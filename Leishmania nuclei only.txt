@@ -1,0 +1,46 @@
+run("Color Picker..."); 
+setForegroundColor(0, 0, 0);
+setBackgroundColor(0, 0, 0);
+run("Close");
+pt = getDirectory("Choose your working directory! ");
+ptn = pt + "wo nucleous\\";
+File.makeDirectory(ptn);
+count = 1; 
+listFiles(pt); 
+function listFiles(pt) {
+	list = getFileList(pt);
+	for (q=0; q<list.length; q++) {
+		if (endsWith(list[q], ".tif"))
+		n=((count++));
+	}
+	for (i=1; i<=n ; i++) {
+		ima = pt+i+".tif"; 
+		open(ima);
+		name = getTitle;
+		run("Split Channels");
+		run("Duplicate...", "title=blue");
+		setAutoThreshold("Otsu dark");
+		run("Convert to Mask");
+		run("Analyze Particles...", "size=1000-Infinity circularity=0.00-1.00 show=Nothing include add");
+		selectWindow("blue");
+		close();
+		nROIs = roiManager("count");
+		j = 0;
+		while (j< nROIs){
+			selectWindow(name+" (blue)");
+			roiManager("Select", j);
+			run("Enlarge...", "enlarge=2");
+			run("Clear", "slice");
+			j = j+1;
+		}
+		if (isOpen("ROI Manager")) {
+			selectWindow("ROI Manager");
+			run("Close");
+		}
+		run("Merge Channels...");
+		saveAs("Tiff", ptn+i+".tif");
+		close();
+	}
+}
+
+
